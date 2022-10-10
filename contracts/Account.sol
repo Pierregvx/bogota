@@ -14,6 +14,7 @@ contract Account is ERC721 {
     }
     mapping(address => User) accounts;
     mapping(address => bool) whitelistStates;
+
     // mapping(address => uint256) weights;
 
     constructor() ERC721("Account", "ACC") {
@@ -23,7 +24,7 @@ contract Account is ERC721 {
     function createAccount(string calldata username) external {
         require(accounts[msg.sender].tokenId == 0, "Account already minted");
         _mint(msg.sender, tokenId);
-        accounts[msg.sender] = User(username,100,tokenId);
+        accounts[msg.sender] = User(username, 100, tokenId);
         whitelistStates[msg.sender] = false;
     }
 

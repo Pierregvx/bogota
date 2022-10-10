@@ -8,9 +8,9 @@ contract DAO {
     address punk;
     address token;
 
-    mapping(address=>uint256) voteReward;
-    mapping(address=>uint256) voteGiven;
-    mapping(address=>mapping(address=>uint256)) voteAllowance;
+    mapping(address => uint256) voteReward;
+    mapping(address => uint256) voteGiven;
+    mapping(address => mapping(address => uint256)) voteAllowance;
     event PostCreated(
         bytes32 indexed postId,
         address indexed postOwner,
@@ -43,7 +43,7 @@ contract DAO {
         bytes32 categoryId;
     }
 
-    constructor(address _accountAddress,address _token) {
+    constructor(address _accountAddress, address _token) {
         accountAddress = _accountAddress;
         token = _token;
     }
@@ -59,25 +59,28 @@ contract DAO {
     }
 
     function isRegistered(address user) public view returns (bool) {
-       return IERC721(accountAddress).balanceOf(user)==1;
+        return IERC721(accountAddress).balanceOf(user) == 1;
     }
-    function delegate(address receiver,uint256 amount)external{
-        require(Token(token).balanceOf(msg.sender)>amount);
-        require(isRegistered(receiver),"receiver not authentificated");
-        voteReward[receiver]+=amount;
-        voteGiven[msg.sender]+=amount;
-        voteAllowance[msg.sender][receiver]+=amount;
 
-
+    function delegate(address receiver, uint256 amount) external {
+        require(Token(token).balanceOf(msg.sender) > amount);
+        require(isRegistered(receiver), "receiver not authentificated");
+        voteReward[receiver] += amount;
+        voteGiven[msg.sender] += amount;
+        voteAllowance[msg.sender][receiver] += amount;
     }
-   function getVotingRight(address user)public view returns(uint256){
-    return (Token(token).balanceOf(user)  + voteReward[user] + voteGiven[user]);
-   }
-   function getBackVoteRights(address to,uint256 amount) external{
-    voteAllowance[msg.sender][to]-=amount;
-   }
 
-    function createPost (
+    function getVotingRight(address user) public view returns (uint256) {
+        return (Token(token).balanceOf(user) +
+            voteReward[user] +
+            voteGiven[user]);
+    }
+
+    function getBackVoteRights(address to, uint256 amount) external {
+        voteAllowance[msg.sender][to] -= amount;
+    }
+
+    function createPost(
         bytes32 _parentId,
         string calldata _contentUri,
         bytes32 _categoryId
@@ -97,10 +100,7 @@ contract DAO {
         emit PostCreated(_postId, _owner, _parentId, _contentId, _categoryId);
     }
 
-    function voteUp(bytes32 _postId, uint8 _reputationAdded)
-        external hasRole
-        
-    {
+    function voteUp(bytes32 _postId, uint8 _reputationAdded) external hasRole {
         address _voter = msg.sender;
         bytes32 _category = postRegistry[_postId].categoryId;
         address _contributor = postRegistry[_postId].postOwner;
@@ -182,7 +182,7 @@ contract DAO {
         }
     }
 
-    function addCategory(string calldata _category) external hasRole{
+    function addCategory(string calldata _category) external hasRole {
         bytes32 _categoryId = keccak256(abi.encode(_category));
         categoryRegistry[_categoryId] = _category;
         emit CategoryCreated(_categoryId, _category);
